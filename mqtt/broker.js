@@ -439,7 +439,7 @@ var authorizePublish = function (client, topic, payload, callback) {
 // The subscribe authorisation process, which is via the smart contract
 
 var authorizeSubscribe = function (clientId, topic, callback) {
-  const url = "https://rinkeby.infura.io/v3/11b4dff1ae1a4556b741e9fe2e81bdf4";
+  const url = "https://rinkeby.infura.io/v3/your-Infura";
 
   const addressFrom = "the broker's Ethereum address";
   const privateKey =   "The private key";
