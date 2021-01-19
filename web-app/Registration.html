@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Load connect and sha256 from CDN -->
+    <script src="https://unpkg.com/uport-connect/dist/uport-connect.js"></script>
+
+    <style>
+        button {
+            margin: auto;
+            display: block;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/gh/ethereumjs/browser-builds/dist/ethereumjs-tx/ethereumjs-tx-1.3.3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <div id="msg">
+        <h1 style="text-align:center;"> Decentralised MQTT </h1>
+        <p style="text-align:center;"> Click the button below to authenticate using UPort mobile App
+            application</p>
+        <button onclick="authentication()">login</button>
+    </div>
+    <script src="./javascript.js"></script>
+    <script type="text/javascript">
+         
+        //////////////////////////////
+        //  Configure connect object
+        /////////////////////////////
+
+        // we need to authenticate before being able to receive a Verifiable Claim. 
+        const Connect = window.uportconnect
+        const uport = new Connect('BIoT', {
+            network: 'rinkeby'
+        })
+        var user = {}
+
+        const contractAbi = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "log",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "test",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
+           
+    function connectCOntract() {
+            const web3 = new Web3(new Web3.providers.HttpProvider('http://rinkeby.infura.io/v3/Your-Infura'))
+            
+            const Connect = window.uportconnect
+            const uport = new Connect('MyDApp') 
+
+            const connect = new Connect('MyDApp', {network: 'rinkeby'})
+            const provider = connect.getProvider()
+
+            const contract = connect.contract(contractAbi).at("smart contract address")
+            const req = 'test'
+
+            contract.test().then(console.log);		
+
+            connect.onResponse(req).then(payload => { 
+                // const address = connect.address
+                // const did = connect.did	
+                console.log(payload);
+                txId = payload.payload
+                // console.log(tx);
+                // console.log(address,did);
+
+            })
+
+         }
+
+         connectCOntract()
+
+         getEevents()
+
+        var addressOfSgner
+        function getEevents(){
+            const contractAbi1 = [
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "log",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "test",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
+           
+        const contractAddress1 = 'smart contract address';
+            let web3 = new Web3(
+            // Replace YOUR-PROJECT-ID with a Project ID from your Infura Dashboard
+            new Web3.providers.WebsocketProvider("wss://rinkeby.infura.io/ws/v3/Your-Infura")
+            );
+            contract = new web3.eth.Contract(contractAbi1,contractAddress1)
+
+            contract.events.log({fromBlock: 0},(err,r) => {
+                addressOfSgner =  r.returnValues[0]
+                console.log(addressOfSgner);
+            })
+        }
+
+        // This is where we create and send a verifiable claim. 
+      
+
+        function authentication() {
+
+            const reqID = 'disclosureReq'
+          
+            uport.requestDisclosure({
+                requested: ['name', 'country'], 
+                network_Id: '0x4'
+            })
+            // Here we extract the data from the Json response.
+            //
+            uport.onResponse('disclosureReq').then(res => {
+                json = res.payload
+                user.name = json.name
+                user.DID = json.did
+                user.country = json.country
+                //user.avatar = json.avatar.uri
+                
+                document.querySelector('#msg').innerHTML =
+                    "<h1 style=\"text-align:center;\" >Congratulations you are now logged in! </h1>" +
+                    "<h2 style=\"text-align:center;\"> Please provide the information below " +
+                    "<form onsubmit=\"issuance()\">" +
+                    
+		    "User Name: <input type=\"text\" name=\"user-name\" id=\"UserName\" required><br>" +
+                    "Device-1 ID: <input type=\"text\" name=\"dev_1add\" id=\"dev_1add\" required><br>" +
+                    "Device-2 ID: <input type=\"text\" name=\"dev_2Add\" id=\"dev_2Add\" required><br>" +
+                    
+                    "<input type=\"submit\" name=\"submit\" value=\"Submit\">" +
+                    "</form>"
+
+            })
+
+        }
+
+        function issuance() {
+
+
+            // Here we put the data in the input fields and place it in the here ...
+        
+        var username = document.getElementById('UserName').value;
+	    var dev_1add = document.getElementById('dev_1add').value;
+        var dev_2Add = document.getElementById('dev_2Add').value;
+        const UserId = addressOfSgner;
+
+            document.querySelector('#msg').innerHTML = "" // we want to get rid of the submission page. Otherwise
+            //  we will go back to the submission page and skip 
+            //  the QR code that must be scanned in order to receive the VC.
+
+            // Here we create and issue the Verfiable credential with an expiry date. 
+            uport.sendVerification({
+                exp: Math.floor(new Date().getTime() / 1000) + 5 * 12 * 30 * 24 * 60 * 60,
+                claim: {
+                    'BIoT': {
+                        'Issuer_DID': `${uport.credentials.did}`,
+                        'UserDID': `${user.DID}`,
+                        'UserName': `${username}`,
+                        'Device-1ID': `${dev_1add}`,
+                        'Device-2ID': `${dev_2Add}`,
+                        'UserID': `${UserId}`
+                    }
+                }
+            })
+            
+        your_Contract_Function(Contract.methods.add(dev_1add));
+
+        function wait() {
+            var test = true;
+            if(array[0]){
+                //for subscriber address
+                your_Contract_Function(Contract.methods.add(dev_2Add));
+                console.log("run from 1")
+                array[0] = false
+            }else if(array[1]){
+                //for publiser address
+                your_Contract_Function(Contract.methods.assignRole(dev_1add,Topic1,'publish'))
+                console.log("run from 2")
+                array[1] = false
+            }else if(array[2]){
+                //for subscriber address
+                your_Contract_Function(Contract.methods.assignRole(dev_2Add,Topic,'publish '))
+                console.log("run from 3")
+                array[2] = false
+                test = false
+            }
+            if(test){
+                setTimeout(() => {
+                    wait()
+                }, 5000);
+            }
+            
+        }
+        wait()
+            
+
+            
+                // After the QR code is generated and scanned you can display a message.
+                document.querySelector('#msg').innerHTML =
+                "<h1> Your Verfiable Credential has been created and sent to your uPort mobile app!</h1>"
+
+            }
+    </script>
+</body>
+
+</html>
